@@ -1,0 +1,5 @@
+option(CSR8811 "Use CSR8811" ON)
+option(ENABLE_HCI_H5 "Enable HCI H5" ON)
+option(M480 "Use M480 Series" OFF)
+option(I94100 "Use I94100 Series" ON)
+set(HCI_BAUDRATE 2000000)

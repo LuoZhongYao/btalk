@@ -1,0 +1,7 @@
+#cmakedefine M480 1
+#cmakedefine I94100 1
+#cmakedefine CSR8811 1
+#cmakedefine ENABLE_HCI_H4 1
+#cmakedefine ENABLE_HCI_H5 1
+#cmakedefine HCI_BAUDRATE @HCI_BAUDRATE@	
+#define APP_AUDIO_RATE 16000
