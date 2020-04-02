@@ -482,7 +482,8 @@ void __initialize_args (int* p_argc, char*** p_argv)
 
 // ----------------------------------------------------------------------------
 
-void _exit (int status)
+void __attribute__((weak))
+_exit (int status)
 {
     /* There is only one SWI for both _exit and _kill. For _exit, call
      the SWI with the second argument set to -1, an invalid value for
@@ -537,6 +538,9 @@ static int newslot (void);
 register char* stack_ptr asm ("sp");
 
 /* following is copied from libc/stdio/local.h to check std streams */
+#ifndef _EXFUN
+#define _EXFUN(P, N)  P N
+#endif
 extern void _EXFUN(__sinit,(struct _reent*));
 #define CHECK_INIT(ptr) \
     do                                          \
@@ -1166,3 +1170,24 @@ char *getcwd (char *buf, size_t size)
 #endif // defined OS_USE_SEMIHOSTING
 
 #endif // __STDC_HOSTED__ == 1
+
+void* __attribute__ ((used))
+_sbrk (int incr)
+{
+	extern unsigned  __HeapBase;
+	extern unsigned  __HeapLimit;
+
+	static unsigned char *heap = (unsigned char*)&__HeapBase;
+	unsigned char *prev_heap;
+
+	if ((heap + incr) < (unsigned char*)&__HeapLimit) {
+		prev_heap = heap;
+
+		heap += incr;
+
+		return (void*) prev_heap;
+	}
+
+	errno = ENOMEM;
+	return (void*)-1;
+}

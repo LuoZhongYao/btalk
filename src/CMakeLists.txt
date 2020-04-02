@@ -1,6 +1,8 @@
 set(target btalk)
 add_executable(${target}.elf)
 target_sources(${target}.elf PRIVATE
+	${CMAKE_SOURCE_DIR}/soc/startup_I94100.S
+	${CMAKE_SOURCE_DIR}/soc/_syscalls.c
 	main.c
 	conn.c
 	app.c
@@ -12,6 +14,10 @@ target_sources(${target}.elf PRIVATE
 	)
 
 target_link_libraries(${target}.elf PRIVATE bluetooth webrtc)
+target_compile_definitions(${target}.elf PRIVATE -DOS_USE_SEMIHOSTING=1
+	-D__STARTUP_CLEAR_BSS=1
+	-D__HEAP_SIZE=0xf000)
+set_property(SOURCE ${CMAKE_SOURCE_DIR}/soc/startup_I94100.S PROPERTY LANGUAGE C)
 
 add_custom_command(TARGET ${target}.elf
 	POST_BUILD
