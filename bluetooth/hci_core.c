@@ -316,6 +316,10 @@ void hci_conn_bthw_connected(void)
 		cp.evt_mask.mask[7] = 0x3d;
 		hci_send_cmd(OGF_HOST_CTL, OCF_SET_EVENT_MASK, &cp, sizeof(cp.evt_mask));
 
+		hci_conn_le_write_host_supported(0x01, 0x01);
+		hci_conn_le_set_advertising_param(0x800, 0x800,
+			0x03, 0x00, 0x00, BDADDR_ANY, 0x07, 0x00);
+
 		memset(&cp, 0, sizeof(cp));
 		cp.del_stored_link_key.delete_all = 1;
 		hci_send_cmd(OGF_HOST_CTL, OCF_DELETE_STORED_LINK_KEY, &cp, sizeof(cp.del_stored_link_key));
@@ -438,7 +442,7 @@ void hci_conn_read_local_version(void)
 	hci_send_cmd(OGF_INFO_PARAM, OCF_READ_LOCAL_VERSION, NULL, 0);
 }
 
-void hci_conn_le_advertising_param(uint16_t min_interval, uint16_t max_interval,
+void hci_conn_le_set_advertising_param(uint16_t min_interval, uint16_t max_interval,
 	uint8_t advtype, uint8_t own_bdaddr_type, uint8_t direct_bdaddr_type,
 	bdaddr_t *direct_bdaddr, uint8_t chan_map, uint8_t filter)
 {
@@ -488,6 +492,12 @@ void hci_conn_le_set_scan_enable(uint8_t enable, uint8_t filter_dup)
 {
 	le_set_scan_enable_cp cp = {enable, filter_dup};
 	hci_send_cmd(OGF_LE_CTL, OCF_LE_SET_SCAN_ENABLE, &cp, sizeof(cp));
+}
+
+void hci_conn_le_write_host_supported(uint8_t le_supp_host, uint8_t sim_le_host)
+{
+	write_le_host_supported_cp cp = {le_supp_host, sim_le_host};
+	hci_send_cmd(OGF_HOST_CTL, OCF_WRITE_LE_HOST_SUPPORTED, &cp, sizeof(cp));
 }
 
 void btstack_run(void)

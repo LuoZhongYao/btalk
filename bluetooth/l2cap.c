@@ -47,11 +47,9 @@ void l2cap_recv_frame(struct bt_conn *conn, struct l2cap_hdr *hdr)
 	break;
 
 	case L2CAP_APP_CHANNEL:
-		//app_l2cap_handler((app_command_hdr*)hdr->paylod, hdr->len);
 	break;
 
 	case L2CAP_SBC_CHANNEL:
-		sbc_codec_dec(hdr->paylod, hdr->len);
 	break;
 
 #if defined(M480)

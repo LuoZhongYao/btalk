@@ -330,7 +330,7 @@ void hci_3wire_work(struct hci_conn *c)
 
 	if (TIMEOUT(c->timeout) && c->reset_uart) {
 		c->reset_uart = 0;
-		UART_Reset(HCI_BAUDRATE);
+		bt_uart_set_baudrate(HCI_BAUDRATE);
 		hci_3wire_reset(c);
 		TIMER_RESET(c->timeout);
 		TIMER_SETUP(c->h5.timeout, H5_LINK_TIMEOUT);

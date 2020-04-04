@@ -1,0 +1,3 @@
+set(ENABLE_HCI_H4 ON CACHE BOOL  "HCI over H4")
+set(HCI_BAUDRATE 2000000 CACHE STRING "Serial baudrate")
+set(CONFIG_BT_MODULE BLUEZ CACHE STRING "Choose bluetooth module")

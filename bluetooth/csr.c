@@ -1,6 +1,7 @@
 #include <config.h>
+#include "btsel.h"
 
-#if defined(CSR8811)
+#if CONFIG_BT_MODULE == CSR8811
 
 #include <string.h>
 #include "csr.h"

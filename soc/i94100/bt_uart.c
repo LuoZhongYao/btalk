@@ -191,7 +191,7 @@ struct kfifo *uart_rx_fifo(void)
 	return &uart.rx_fifo;
 }
 
-void UART_Reset(uint32_t baudrate)
+void bt_uart_set_baudrate(uint32_t baudrate)
 {
     UART_Open(UART0, baudrate);
 
@@ -208,5 +208,10 @@ void UART_Reset(uint32_t baudrate)
     NVIC_EnableIRQ(UART0_IRQn);
 	NVIC_SetPriority(UART0_IRQn, 1);
 #endif
+}
+
+void bt_uart_set_flowctrl(void)
+{
+	UART_EnableFlowCtrl(UART0);
 }
 

@@ -1,0 +1,38 @@
+target_sources(soc PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/crc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/soc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/SysClk.c
+	${CMAKE_CURRENT_SOURCE_DIR}/flash.c
+	${CMAKE_CURRENT_SOURCE_DIR}/bt.c
+	${CMAKE_CURRENT_SOURCE_DIR}/bt_uart.c
+
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/clk.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/crc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/dmic.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/dpwm.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/eadc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/fmc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/gpio.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/i2c.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/i2s.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/pdma.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/pwm.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/rtc.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/spi.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/sys.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/timer.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/uart.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/usbd.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/vad.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/wdt.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/wwdt.c
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/Device/Nuvoton/I94100/Source/system_I94100.c
+	#${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/src/retarget.c
+	)
+
+target_compile_definitions(soc PUBLIC -D__HXT=12000000UL)
+target_include_directories(soc PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/CMSIS/Include
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/StdDriver/inc
+	${CMAKE_CURRENT_SOURCE_DIR}/I94100_BSP_V3.05.002/Library/Device/Nuvoton/I94100/Include
+	)

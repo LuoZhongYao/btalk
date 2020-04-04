@@ -4,31 +4,19 @@
 #include "sbc_codec.h"
 #include "app_private.h"
 #include "rate_display.h"
+#include <soc.h>
 #include <config.h>
 #include <string.h>
 
 #define APP_FLASH_MAGIC	0x48534144
-
-#ifdef M480
-
-#define APP_FLASH_BASE	0x3f000
-
-#elif defined(I94100)
-
 #define APP_FLASH_BASE  0x3e000
-
-#endif
 
 #ifdef ENABLE_DEBUG
 static const char *const status_string[] = {
 	"Base",
 	"Init",
 	"Idle",
-	"Discovery",
-	"Inquiry",
-	"Remote connect",
-	"Local connect",
-	"Connected",
+	"Advertising",
 };
 #endif
 
@@ -41,36 +29,6 @@ void power_off(void)
 }
 
 const uint8_t dev_class[] = {0x08, 0x25, 0x01};
-static void sbc_enc_handler(const uint8_t *buf, unsigned size)
-{
-	if (app.status == APP_STATUS_CONNECTED)
-	{
-		/* sbc_write(buf, size); */
-		/* Sacrifice logic, get a little optimization */
-		//acl_write(buf, size);
-	}
-}
-
-static void sbc_dec_handler(const uint8_t *buf, unsigned size)
-{
-	static struct rate_display ra;
-
-	rate_display(&ra, size, "Decode", "B", 5);
-
-	if (kfifo_avail(&app.dec_fifo) < size) {
-		BLOGE("Decode fifo overflow, avail = %d, size = %d, len = %d, req = %d\n",
-			kfifo_avail(&app.dec_fifo), kfifo_size(&app.dec_fifo),
-			kfifo_len(&app.dec_fifo), size);
-	}
-
-	kfifo_in(&app.dec_fifo, buf, size);
-
-	//void AudioPlayStart(void);
-	if ((kfifo_len(&app.dec_fifo) >= 128 * 4 * 4))
-	{
-		//AudioPlayStart();
-	}
-}
 
 void app_flash_store(void)
 {
@@ -110,53 +68,23 @@ void app_flash_load(void)
 
 static void exit_state_init(app_status_t status)
 {
+	uint8_t adv_data[31] = {
+		0x06, 0x09,
+		'b', 't', 'a', 'l', 'k'
+	};
 	hci_conn_write_dev_class(dev_class);
 	hci_conn_write_scan_enable(SCAN_PAGE);
+	hci_conn_le_set_scan_param(0x00, 0x0010, 0x0010, 0x00, 0x00);
+	hci_conn_le_set_advertising_data(adv_data, sizeof(adv_data));
 }
 
 static void exit_state_idle(app_status_t status)
 {
 }
 
-static void exit_state_discovery(app_status_t status)
+static void exit_state_advertising(app_status_t status)
 {
-	hci_conn_write_scan_enable(SCAN_PAGE);
-}
-
-static void exit_state_inquiring(app_status_t status)
-{
-	if (status != APP_STATUS_INQUIRYING
-		&& app.status == APP_STATUS_INQUIRYING
-		&& app.inquirying)
-	{
-		hci_send_cmd(OGF_LINK_CTL, OCF_INQUIRY_CANCEL, NULL, 0);
-	}
-	app.inquirying = false;
-}
-
-static void exit_state_local_connect(app_status_t status)
-{
-	if ((status != APP_STATUS_CONNECTED
-		|| status != APP_STATUS_IDLE)
-		&& app.connecting)
-	{
-		hci_conn_connection_cancel(&app.flash.remote_address);
-	}
-	app.connecting = false;
-}
-
-static void exit_state_remote_connect(app_status_t status)
-{
-}
-
-static void exit_state_connected(app_status_t status)
-{
-	hci_conn_write_scan_enable(SCAN_PAGE);
-
-#if defined(M480)
-	app_media_status_change(0);
-#endif
-	sbc_codec_reset();
+	hci_conn_le_set_advertising_enable(0x00);
 }
 
 static void enter_state_init(app_status_t status)
@@ -171,51 +99,11 @@ static void enter_state_idle(app_status_t status)
 	}
 }
 
-static void enter_state_discovery(app_status_t status)
+static void enter_state_advertising(app_status_t status)
 {
-	hci_conn_write_scan_enable(SCAN_PAGE | SCAN_INQUIRY);
-}
-
-static void enter_state_inquiring(app_status_t old_status)
-{
-	if (old_status != APP_STATUS_INQUIRYING)
-	{
-		app.inquirying = true;
-		app.rssi = -127;
-		memset(&app.flash.remote_address, 0, sizeof(app.flash.remote_address));
-		hci_conn_inquiry(GIAC, 4, 8);
-	}
-}
-
-static void enter_state_local_connect(app_status_t status)
-{
-	create_conn_cp cp = {
-		.bdaddr = app.flash.remote_address,
-		.pkt_type = ACL_PTYPE_MASK,
-		.pscan_rep_mode = 0,
-		.pscan_mode = 0,
-		.clock_offset = 0,
-		.role_switch = 1
-	};
-
-	BLOGD("Create connection rssi = %d " BD_STR "\n",
-		app.rssi, BD_FMT(&app.flash.remote_address));
-
-	app.connecting = true;
-	hci_send_cmd(OGF_LINK_CTL, OCF_CREATE_CONN, &cp, sizeof(cp));
-}
-
-static void enter_state_remote_connect(app_status_t old_status)
-{
-}
-
-static void enter_state_connected(app_status_t old_status)
-{
-	if (old_status == APP_STATUS_LOCAL_CONNECT) {
-		hci_conn_write_supervision_timeout(0xc80);
-	}
-	hci_conn_write_scan_enable(SCAN_DISABLED);
-	app_flash_store();
+	DELAY(D_MILLISECOND(100));
+	hci_conn_le_set_scan_enable(0x01, 0x00);
+	hci_conn_le_set_advertising_enable(0x01);
 }
 
 static void app_exit_status(app_status_t status)
@@ -230,25 +118,10 @@ static void app_exit_status(app_status_t status)
 		exit_state_idle(status);
 	break;
 
-	case APP_STATUS_DISCOVERY:
-		exit_state_discovery(status);
+	case APP_STATUS_ADVERTISING:
+		exit_state_advertising(status);
 	break;
 
-	case APP_STATUS_INQUIRYING:
-		exit_state_inquiring(status);
-	break;
-
-	case APP_STATUS_REMOTE_CONNECT:
-		exit_state_remote_connect(status);
-	break;
-
-	case APP_STATUS_LOCAL_CONNECT:
-		exit_state_local_connect(status);
-	break;
-
-	case APP_STATUS_CONNECTED:
-		exit_state_connected(status);
-	break;
 	}
 }
 
@@ -264,25 +137,10 @@ static void app_enter_status(app_status_t old_status)
 		enter_state_idle(old_status);
 	break;
 
-	case APP_STATUS_DISCOVERY:
-		enter_state_discovery(old_status);
+	case APP_STATUS_ADVERTISING:
+		enter_state_advertising(old_status);
 	break;
 
-	case APP_STATUS_INQUIRYING:
-		enter_state_inquiring(old_status);
-	break;
-
-	case APP_STATUS_LOCAL_CONNECT:
-		enter_state_local_connect(old_status);
-	break;
-
-	case APP_STATUS_REMOTE_CONNECT:
-		enter_state_remote_connect(old_status);
-	break;
-
-	case APP_STATUS_CONNECTED:
-		enter_state_connected(old_status);
-	break;
 	}
 }
 
@@ -291,17 +149,11 @@ void app_set_status(app_status_t status)
 	app_status_t old_status = app.status;
 	if (status < APP_STATUS_MAX && status != app.status) {
 
-		if (status >= APP_STATUS_INQUIRYING)
-			TIMER_RESET(app.reconnect_timeout);
-
 		app_exit_status(status);
 		app.status = status;
 		app_enter_status(old_status);
 
-		if (status == APP_STATUS_IDLE && app.reconnect_timeout != 0)
-			app_led_set_status(APP_STATUS_LOCAL_CONNECT);
-		else
-			app_led_set_status(status);
+		app_led_set_status(status);
 
 		BLOGE("App status change: %s -> %s\n", status_string[old_status], status_string[status]);
 	}
@@ -324,15 +176,6 @@ int app_rand(void)
 	return app.srand;
 }
 
-void app_start_inquiry(void)
-{
-	if (app.status <= APP_STATUS_INIT) {
-		app.init_cmpl_status = APP_STATUS_INQUIRYING;
-	} else if (app.status != APP_STATUS_CONNECTED) {
-		app_set_status(APP_STATUS_INQUIRYING);
-	}
-}
-
 bool app_get_local_address(bdaddr_t *ba)
 {
 	if (!bacmp(&app.flash.local_address, BDADDR_ANY) ||
@@ -350,24 +193,11 @@ bool app_get_local_address(bdaddr_t *ba)
 	return true;
 }
 
-void app_start_discovery(void)
-{
-	if (app.status > APP_STATUS_INIT) {
-		app_set_status(APP_STATUS_DISCOVERY);
-	} else {
-		app.init_cmpl_status = APP_STATUS_DISCOVERY;
-	}
-}
-
 void app_power_off(void)
 {
 	app.power_off = 1;
 	if (app.status == APP_STATUS_IDLE) {
 		power_off();
-	} else if (app.status != APP_STATUS_CONNECTED) {
-		app_set_status(APP_STATUS_IDLE);
-	} else {
-		hci_conn_disconnect_request(0x13);
 	}
 }
 
@@ -383,16 +213,7 @@ void app_dec_fifo_reset(void)
 
 void app_handle_init_complete(void)
 {
-	app_status_t status = APP_STATUS_IDLE;
-
-#if defined(M480)
-	status = APP_STATUS_DISCOVERY;
-	if (bacmp(&app.flash.remote_address, BDADDR_ANY)
-		&& bacmp(&app.flash.remote_address, BDADDR_ALL))
-	{
-		status = APP_STATUS_LOCAL_CONNECT;
-	}
-#endif
+	app_status_t status = APP_STATUS_ADVERTISING;
 
 	if (app.init_cmpl_status != APP_STATUS_BASE)
 		status = app.init_cmpl_status;
@@ -402,26 +223,12 @@ void app_handle_init_complete(void)
 
 void app_init(void)
 {
-#define __(a, b) a ## b
-#define _(a, b) __(a, b)
-	struct a2dp_sbc a2dp = {
-		.channel_mode = A2DP_CHANNEL_MODE_JOINT_STEREO,
-		.frequency = _(A2DP_SAMPLING_FREQ_, APP_AUDIO_RATE),
-		.allocation_method = A2DP_ALLOCATION_SNR,
-		.subbands = A2DP_SUBBANDS_8,
-		.block_length = A2DP_BLOCK_LENGTH_16,
-		.min_bitpool = 2,
-		.max_bitpool = 53,
-	};
-#undef _
-#undef __
 
 	memset(&app, 0, sizeof(app));
 
 	app_flash_load();
 
 	kfifo_init(&app.dec_fifo, app.dec_buf, sizeof(app.dec_buf));
-	sbc_codec_init(&a2dp, 672, sbc_enc_handler, sbc_dec_handler);
 
 	app_set_status(APP_STATUS_INIT);
 }

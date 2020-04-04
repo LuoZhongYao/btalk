@@ -1,0 +1,4 @@
+set(I94100 ON CACHE BOOL "Use I94100 Series")
+set(ENABLE_HCI_H4 ON CACHE BOOL  "HCI over H4")
+set(HCI_BAUDRATE 2000000 CACHE STRING "Serial baudrate")
+set(CONFIG_BT_MODULE CSR8811 CACHE STRING "Choose bluetooth module")

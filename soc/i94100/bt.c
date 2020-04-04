@@ -9,7 +9,7 @@
 #include <Platform.h>
 #include "bt_uart.h"
 
-#if defined(CSR8811)
+#if CONFIG_BT_MODULE == CSR8811
 
 void csr_init(void)
 {

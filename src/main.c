@@ -12,29 +12,6 @@
 #include "conn.h"
 #include "app_private.h"
 
-static void app_handle_inquiry_result(inquiry_info_with_rssi *result)
-{
-	if (app.status != APP_STATUS_INQUIRYING)
-		return ;
-
-	if (!memcmp(result->dev_class, dev_class, sizeof(dev_class)) && result->rssi > app.rssi) {
-		BLOGI("Update found device " BD_STR " old rssi = %d, new rssi = %d\n",
-			BD_FMT(&result->bdaddr), app.rssi, result->rssi);
-		bacpy(&app.flash.remote_address, &result->bdaddr);
-		app.rssi = result->rssi;
-	}
-}
-
-static void app_handle_inquiry_complete(void)
-{
-	if (bacmp(&app.flash.remote_address, BDADDR_ANY)) {
-		app.inquirying = false;
-		app_set_status(APP_STATUS_LOCAL_CONNECT);
-	} else {
-		hci_conn_inquiry(GIAC, 4, 8);
-	}
-}
-
 static void app_handle_disconn_complete(uint8_t status, uint8_t reason)
 {
 #if defined(M480)
@@ -76,13 +53,10 @@ static void hci_inquiry_result_evt(inquiry_info_with_rssi *info)
 {
 	BLOGI("Found " BD_STR ", rssi = %d dev_class = %02x%02x%02x\n",
 		BD_FMT(&info->bdaddr), info->rssi, info->dev_class[0], info->dev_class[1], info->dev_class[2]);
-
-	app_handle_inquiry_result(info);
 }
 
 static void hci_inquiry_complete_evt(void)
 {
-	app_handle_inquiry_complete();
 }
 
 static void hci_conn_complete_evt(evt_conn_complete *con)
@@ -135,9 +109,7 @@ static void hci_disconn_complete_evt(evt_disconn_complete *evt)
 		evt->handle, evt->status, evt->reason);
 
 	conn = conn_lookup_by_handle(evt->handle);
-	if (conn) {
-		conn_set_state(conn, CONN_STATE_ADVERTISING);
-	}
+	conn_set_state(conn, CONN_STATE_IDLE);
 }
 
 static void hci_io_capability_request_evt(evt_io_capability_request *req)
@@ -213,11 +185,12 @@ int main(void)
 {
 	soc_init();
 	app_init();
+	conn_init();
 	hci_runtime_init(&btcb);
 
 	while (1) {
 		btstack_run();
-		sbc_codec_run();
+		conn_workloop();
 	}
 
 	return 0;

@@ -124,7 +124,7 @@ static PT_THREAD(app_echo_work(struct app_echo *app))
 				m2s(cs32, cm32, cm32, NN32K);
 			}, "Echo");
 
-			sbc_codec_enc((void*)cs32, sizeof(cs32));
+			//sbc_codec_enc((void*)cs32, sizeof(cs32));
 		}
 	}
 

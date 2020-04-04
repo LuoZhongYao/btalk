@@ -15,4 +15,5 @@ target_sources(bluetooth PRIVATE
 	user_cb.c
 	sbc_codec.c
 	)
+
 target_link_libraries(bluetooth PUBLIC soc sbc)

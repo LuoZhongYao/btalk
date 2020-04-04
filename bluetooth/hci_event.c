@@ -40,7 +40,7 @@ static void hci_cmd_status_evt(evt_cmd_status *rp)
 {
 	switch (rp->opcode) {
 	case 0x0000:
-#if defined(CSR8811)
+#if CONFIG_BT_MODULE == CSR8811
 		hci_conn_bthw_connected();
 #endif
 	break;

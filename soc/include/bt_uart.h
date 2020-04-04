@@ -9,7 +9,8 @@
 #include <fifo.h>
 
 void UART0_Init(uint32_t baudrate);
-void UART_Reset(uint32_t baudrate);
+void bt_uart_set_flowctrl(void);
+void bt_uart_set_baudrate(uint32_t baudrate);
 unsigned uart_write(const uint8_t *buf, unsigned size);
 bool uart_tx_busy(void);
 unsigned uart_rx_len(void);

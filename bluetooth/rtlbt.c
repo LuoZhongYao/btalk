@@ -1,12 +1,12 @@
-#if defined(RTL8761)
-
-#include "sys_config.h"
-#include "chipsel.h"
+#include <config.h>
+#include "btsel.h"
 #include "bt_uart.h"
 #include "hci_private.h"
 #include "rtl8761b_fw.h"
 #include "rtlbt.h"
 #include <time.h>
+
+#if CONFIG_BT_MODULE == RTL8761
 
 #if defined(M480)
 

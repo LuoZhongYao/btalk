@@ -5,7 +5,7 @@
 #ifndef __RTLBT_H__
 #define __RTLBT_H__
 
-#include <hci.h>
+#include <bluetooth/hci.h>
 #include <stdint.h>
 
 void rtlbt_init(void);

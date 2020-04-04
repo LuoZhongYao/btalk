@@ -1,9 +1,11 @@
+#include <config.h>
 #include "rdabt.h"
 #include "bt_uart.h"
+#include "btsel.h"
 #include "hci_private.h"
 #include <defs.h>
 
-#if defined(RDA5876)
+#if CONFIG_BT_MODULE == RDA5876
 
 #define RDABT_VENDOR_AUTO_BAUDRATE 0x77
 

@@ -5,7 +5,10 @@
 #ifndef __SBC_CODEC_H__
 #define __SBC_CODEC_H__
 
+#include <fifo.h>
 #include <stdint.h>
+#include <sbc/sbc.h>
+#include <pt-1.4/pt.h>
 
 #define SBC_SYNCWORD	0x9C
 
@@ -61,17 +64,43 @@ struct a2dp_sbc {
 #error "Unknown byte order"
 #endif
 
-void sbc_codec_init(struct a2dp_sbc *sbc, unsigned payloadsize,
+struct codec_task
+{
+	unsigned ifrmlen:10;
+	unsigned ofrmlen:10;
+
+	struct pt pt;
+	struct kfifo fifo;
+	sbc_t	sbc;
+	void (*prcoess)(const uint8_t *buf, unsigned size);
+	uint8_t ebuf[1024];
+	uint8_t kbuf[4 * 1024];
+};
+
+struct codec
+{
+	unsigned nrfrm:4;
+	unsigned maxfrm:4;
+	unsigned encoded:12;
+	uint8_t  tbuf[1024];
+
+	struct codec_task enc;
+	struct codec_task dec;
+};
+
+void sbc_codec_init(
+	struct codec *code,
+	struct a2dp_sbc *sbc, unsigned payloadsize,
 	void (*enc)(const uint8_t *buf, unsigned size),
 	void (*dec)(const uint8_t *buf, unsigned size));
-void sbc_codec_reset(void);
-void sbc_codec_run(void);
+void sbc_codec_reset(struct codec *codec);
+void sbc_codec_workloop(struct codec *codec);
 
-unsigned sbc_codec_dec_out(uint8_t *buf, unsigned size);
-unsigned sbc_codec_enc_out(uint8_t *buf, unsigned size);
+unsigned sbc_codec_dec_out(struct codec *codec, uint8_t *buf, unsigned size);
+unsigned sbc_codec_enc_out(struct codec *codec, uint8_t *buf, unsigned size);
 
-unsigned sbc_codec_enc(const uint8_t *buf, unsigned size);
-unsigned sbc_codec_dec(const uint8_t *buf, unsigned size);
+unsigned sbc_codec_enc(struct codec *cdeoc, const uint8_t *buf, unsigned size);
+unsigned sbc_codec_dec(struct codec *cdeoc, const uint8_t *buf, unsigned size);
 
 #endif /* __SBC_CODEC_H__*/
 

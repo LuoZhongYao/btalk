@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include "hci_private.h"
 #include "bt_uart.h"
 #include "debug.h"
@@ -149,8 +151,8 @@ void hci_h4_work(struct hci_conn *c)
 	if (c->timeout && TIMEOUT(c->timeout) && c->reset_uart) {
 		c->reset_uart = 0;
 		TIMER_RESET(c->timeout);
-		Uart_Reset(HCI_BAUDRATE);
-		UART_EnableFlowCtrl(UART0);
+		bt_uart_set_baudrate(HCI_BAUDRATE);
+		bt_uart_set_flowctrl();
 	}
 }
 

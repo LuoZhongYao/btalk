@@ -228,7 +228,7 @@ void hci_conn_user_confirm_neg_reply(bdaddr_t *ba);
 void hci_conn_disconnect_request(uint8_t reason);
 void hci_conn_connection_cancel(bdaddr_t *ba);
 void hci_conn_read_local_version(void);
-void hci_conn_le_advertising_param(uint16_t min_interval, uint16_t max_interval,
+void hci_conn_le_set_advertising_param(uint16_t min_interval, uint16_t max_interval,
 	uint8_t advtype, uint8_t own_bdaddr_type, uint8_t direct_bdaddr_type,
 	bdaddr_t *direct_bdaddr, uint8_t chan_map, uint8_t filter);
 void hci_conn_le_set_advertising_data(uint8_t *data, uint8_t length);
@@ -236,6 +236,7 @@ void hci_conn_le_set_advertising_enable(uint8_t enable);
 void hci_conn_le_set_scan_param(uint8_t type, uint16_t interval, uint16_t window,
 	uint8_t own_bdaddr_type, uint8_t filter);
 void hci_conn_le_set_scan_enable(uint8_t enable, uint8_t filter_dup);
+void hci_conn_le_write_host_supported(uint8_t le_supp_host, uint8_t sim_le_host);
 
 
 int hci_send_cmd(uint16_t ogf, uint16_t ocf, const void *params, uint8_t plen);

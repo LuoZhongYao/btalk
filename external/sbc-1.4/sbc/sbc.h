@@ -33,8 +33,12 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-typedef unsigned size_t;
+#include <stddef.h>
+//typedef unsigned size_t;
+#ifndef __ssize_t_defined
+#define __ssize_t_defined
 typedef int ssize_t;
+#endif
 
 
 /* sampling frequency */
