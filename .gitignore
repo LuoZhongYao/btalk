@@ -32,5 +32,5 @@ lst/
 obj/
 build/
 Nu_Link_Driver.ini
-soc/I94100_BSP_V3.05.002
+#soc/I94100_BSP_V3.05.002
 compile_commands.json

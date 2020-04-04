@@ -40,7 +40,5 @@ void app_start_inquiry(void);
 void app_handle_init_complete(void);
 bool app_get_local_address(bdaddr_t *ba);
 
-uint32_t crc32(uint32_t *buf, unsigned size);
-
 #endif /* __APP_H__*/
 

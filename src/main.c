@@ -3,6 +3,7 @@
  *
  * Copyright 2020 ZhongYao Luo
  */
+#include <soc.h>
 #include <time.h>
 #include <debug.h>
 #include <sbc_codec.h>
@@ -210,6 +211,7 @@ static const struct btcb btcb = {
 
 int main(void)
 {
+	soc_init();
 	app_init();
 	hci_runtime_init(&btcb);
 

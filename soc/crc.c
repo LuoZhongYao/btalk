@@ -3,7 +3,8 @@
  *
  * Copyright 2020 ZhongYao Luo
  */
-#include "crc.h"
+#include <soc.h>
+#include <crc.h>
 #include "chipsel.h"
 
 uint32_t crc32(const uint32_t *buf, unsigned size)

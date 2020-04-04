@@ -13,7 +13,7 @@ target_sources(${target}.elf PRIVATE
 	resampler.c
 	)
 
-target_link_libraries(${target}.elf PRIVATE bluetooth webrtc)
+target_link_libraries(${target}.elf PRIVATE soc bluetooth webrtc)
 target_compile_definitions(${target}.elf PRIVATE -DOS_USE_SEMIHOSTING=1
 	-D__STARTUP_CLEAR_BSS=1
 	-D__HEAP_SIZE=0xf000)

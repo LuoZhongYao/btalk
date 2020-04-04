@@ -106,6 +106,8 @@ void uart0_pdma_irqhandler(void)
 
 void UART0_Init(uint32_t baudrate)
 {
+	CLK_EnableModuleClock(UART0_MODULE);
+	CLK_SetModuleClock(UART0_MODULE, CLK_CLKSEL1_UART0SEL_PLL, CLK_CLKDIV0_UART0(4));
 #if defined(M480)
 	/* Select UART clock source is HXT */
     CLK->CLKSEL1 = (CLK->CLKSEL1 & ~CLK_CLKSEL1_UART0SEL_Msk) | (0x1 << CLK_CLKSEL1_UART0SEL_Pos);

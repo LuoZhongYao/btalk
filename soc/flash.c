@@ -4,7 +4,7 @@
  * Copyright 2020 ZhongYao Luo
  */
 
-#include "flash.h"
+#include <soc.h>
 #include "chipsel.h"
 
 void flash_erase(unsigned addr)

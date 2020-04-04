@@ -1,6 +1,6 @@
 #include <config.h>
 
-#include <crc.h>
+#include <soc.h>
 #include <time.h>
 #include <bt_uart.h>
 #include <debug.h>

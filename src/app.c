@@ -5,7 +5,6 @@
 #include "app_private.h"
 #include "rate_display.h"
 #include <config.h>
-#include <flash.h>
 #include <string.h>
 
 #define APP_FLASH_MAGIC	0x48534144
